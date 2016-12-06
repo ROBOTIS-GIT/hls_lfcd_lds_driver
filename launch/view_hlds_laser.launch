@@ -1,0 +1,6 @@
+<launch>
+  <include file="$(find hls_lfcd_lds_drv)/launch/hlds_laser.launch" />
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hls_lfcd_lds_drv)/rviz/hlds_laser.rviz" />
+</launch>
+
