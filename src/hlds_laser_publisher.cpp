@@ -35,11 +35,11 @@
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <boost/asio.hpp>
-#include <hls_lfcd_lds/lfcd_laser.h>
+#include <hls_lfcd_lds_driver/lfcd_laser.h>
 #include <std_msgs/UInt16.h>
 
 namespace hls_lfcd_lds {
-	LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, uint32_t lfcdstartstop, boost::asio::io_service& io): port_(port), 
+	LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, uint32_t lfcdstartstop, boost::asio::io_service& io): port_(port),
 	baud_rate_(baud_rate), lfcdstartstop_(lfcdstartstop), shutting_down_(false), serial_(io, port_) {
 		serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
 		if(lfcdstartstop_ == 1) {
@@ -88,7 +88,7 @@ namespace hls_lfcd_lds {
 						if(raw_bytes[i] == 0xFA && raw_bytes[i+1] == (0xA0+i/42)) {//&& CRC check
 							good_sets++;
 							motor_speed += (raw_bytes[i+3] << 8) + raw_bytes[i+2]; //accumulate count for avg. time increment
-							rpms=(raw_bytes[i+3]<<8|raw_bytes[i+2])/10; 
+							rpms=(raw_bytes[i+3]<<8|raw_bytes[i+2])/10;
 							for(uint16_t j = i+4; j < i+40; j=j+6) {
 							  index = (6*i)/42 + (j-6-i)/6;
 								// Four bytes per reading
@@ -128,8 +128,8 @@ int main(int argc, char **argv)
 	std::string frame_id;
 	int lfcdstart;
 	int lfcdstop;
- 
-	std_msgs::UInt16 rpms; 
+
+	std_msgs::UInt16 rpms;
 
 	priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
 	priv_nh.param("baud_rate", baud_rate, 230400);
