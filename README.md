@@ -2,6 +2,8 @@
 
 ROS package for HLDS HLS-LFCD LDS driver
 
+ROS Wiki: [hls_lfcd_lds_driver](http://wiki.ros.org/hls_lfcd_lds_driver)
+
 ROS Packages Maintainer: [ROBOTIS](http://wiki.ros.org/ROBOTIS)
 
 Manufacturer of the LDS: [Hitachi-LG Data Storage](http://hlds.co.kr/v2/e_index.html)
