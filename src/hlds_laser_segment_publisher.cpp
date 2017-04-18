@@ -62,6 +62,15 @@ LFCDLaser::LFCDLaser(boost::asio::io_service& io)
     boost::asio::write(serial_, boost::asio::buffer("e", 1));
   }
 
+  accumulated_scan_.header.frame_id = frame_id_;
+  accumulated_scan_.angle_min = 0.0;
+  accumulated_scan_.angle_max = 2.0*M_PI;
+  accumulated_scan_.angle_increment = (2.0*M_PI/360.0);
+  accumulated_scan_.range_min = 0.12;
+  accumulated_scan_.range_max = 3.5;
+  accumulated_scan_.ranges.resize(360);
+  accumulated_scan_.intensities.resize(360);
+
   laser_org_pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan_org", 100);
   laser_pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan", 100);
 }
@@ -134,15 +143,16 @@ void LFCDLaser::poll()
               // uint16_t intensity = (byte3 << 8) + byte2;
               uint16_t range = (byte3 << 8) + byte2;
 
-              scan_.ranges[359-index] = range / 1000.0;
-              scan_.intensities[359-index] = intensity;
+              scan_.ranges[359-index] = accumulated_scan_.ranges[359-index] = range / 1000.0;
+              scan_.intensities[359-index] = accumulated_scan_.intensities[359-index] = intensity;
             }
           }
-          scan_.time_increment = motor_speed/good_sets/1e8;
-          scan_.header.stamp = ros::Time::now();
-          laser_pub_.publish(scan_);
+          accumulated_scan_.time_increment = motor_speed/good_sets/1e8;
+          accumulated_scan_.header.stamp = ros::Time::now();
+          laser_pub_.publish(accumulated_scan_);
           ros::spinOnce();
         }
+        scan_.time_increment = motor_speed/good_sets/1e8;
         scan_.header.stamp = ros::Time::now();
         laser_org_pub_.publish(scan_);
         ros::spinOnce();
