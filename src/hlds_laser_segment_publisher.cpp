@@ -45,7 +45,7 @@ LFCDLaser::LFCDLaser(boost::asio::io_service& io)
 {
   nh_.param("port", port_, std::string("/dev/ttyUSB0"));
   nh_.param("baud_rate", baud_rate_, 230400);
-  nh_.param("frame_id", frame_id_, std::string("laser"));
+  nh_.param("frame_id", frame_id_, std::string("base_scan"));
   nh_.param("lfcd_start", lfcdstart_, 1);
   nh_.param("lfcd_stop", lfcdstop_, 2);
   nh_.param("lfcd_start", lfcdstartstop_, lfcdstart_);
