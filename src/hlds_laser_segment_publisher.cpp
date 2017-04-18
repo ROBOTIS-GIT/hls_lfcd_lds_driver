@@ -45,7 +45,7 @@ LFCDLaser::LFCDLaser(boost::asio::io_service& io)
 {
   nh_.param("port", port_, std::string("/dev/ttyUSB0"));
   nh_.param("baud_rate", baud_rate_, 230400);
-  nh_.param("frame_id", scan.header.frame_id, std::string("laser"));
+  nh_.param("frame_id", frame_id_, std::string("laser"));
   nh_.param("lfcd_start", lfcdstart_, 1);
   nh_.param("lfcd_stop", lfcdstop_, 2);
   nh_.param("lfcd_start", lfcdstartstop_, lfcdstart_);
@@ -62,8 +62,8 @@ LFCDLaser::LFCDLaser(boost::asio::io_service& io)
     boost::asio::write(serial_, boost::asio::buffer("e", 1));
   }
 
-  laser_org_pub = nh_.advertise<sensor_msgs::LaserScan>("scan_org", 100);
-  laser_pub = nh_.advertise<sensor_msgs::LaserScan>("scan", 100);
+  laser_org_pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan_org", 100);
+  laser_pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan", 100);
 }
 
 void LFCDLaser::poll()
@@ -75,6 +75,8 @@ void LFCDLaser::poll()
   uint8_t good_sets = 0;
   uint32_t motor_speed = 0;
   int index;
+
+  scan_.header.frame_id = frame_id_;
 
   while (!shutting_down_ && !got_scan)
   {
@@ -99,13 +101,13 @@ void LFCDLaser::poll()
 
         boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[2], 2518));
 
-        scan.angle_min = 0.0;
-        scan.angle_max = 2.0*M_PI;
-        scan.angle_increment = (2.0*M_PI/360.0);
-        scan.range_min = 0.12;
-        scan.range_max = 3.5;
-        scan.ranges.resize(360);
-        scan.intensities.resize(360);
+        scan_.angle_min = 0.0;
+        scan_.angle_max = 2.0*M_PI;
+        scan_.angle_increment = (2.0*M_PI/360.0);
+        scan_.range_min = 0.12;
+        scan_.range_max = 3.5;
+        scan_.ranges.resize(360);
+        scan_.intensities.resize(360);
 
         //read data in sets of 6
         for(uint16_t i = 0; i < raw_bytes.size(); i=i+42)
@@ -132,17 +134,17 @@ void LFCDLaser::poll()
               // uint16_t intensity = (byte3 << 8) + byte2;
               uint16_t range = (byte3 << 8) + byte2;
 
-              scan.ranges[359-index] = range / 1000.0;
-              scan.intensities[359-index] = intensity;
+              scan_.ranges[359-index] = range / 1000.0;
+              scan_.intensities[359-index] = intensity;
             }
           }
-          scan.time_increment = motor_speed/good_sets/1e8;
-          scan.header.stamp = ros::Time::now();
-          laser_pub.publish(scan);
+          scan_.time_increment = motor_speed/good_sets/1e8;
+          scan_.header.stamp = ros::Time::now();
+          laser_pub_.publish(scan_);
           ros::spinOnce();
         }
-        scan.header.stamp = ros::Time::now();
-        laser_org_pub.publish(scan);
+        scan_.header.stamp = ros::Time::now();
+        laser_org_pub_.publish(scan_);
         ros::spinOnce();
       }
       else
