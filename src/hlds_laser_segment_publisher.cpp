@@ -168,9 +168,9 @@ void LFCDLaser::poll()
 void LFCDLaser::close()
 {
   shutting_down_ = true;
-  boost::asio::write(serial_, boost::asio::buffer("e", 1));
   serial_.open(port_);
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
+  boost::asio::write(serial_, boost::asio::buffer("e", 1));
 };
 };
 
