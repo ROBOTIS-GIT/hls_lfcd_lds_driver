@@ -28,20 +28,29 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
- /* Authors: SP Kong, JH Yang */
- /* maintainer: Pyo */
+/* Authors: SP Kong, JH Yang, Pyo */
+/* maintainer: Pyo */
 
 #include <ros/ros.h>
 #include <sensor_msgs/LaserScan.h>
 #include <boost/asio.hpp>
-#include <hls_lfcd_lds_driver/lfcd_laser.h>
-#include <std_msgs/UInt16.h>
+#include <hls_lfcd_lds_driver/hlds_laser_segment_publisher.h>
+
 
 namespace hls_lfcd_lds
 {
-LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, uint32_t lfcdstartstop, boost::asio::io_service& io): port_(port),
-baud_rate_(baud_rate), lfcdstartstop_(lfcdstartstop), shutting_down_(false), serial_(io, port_)
+LFCDLaser::LFCDLaser(boost::asio::io_service& io)
+: serial_(io),
+  shutting_down_(false)
 {
+  nh_.param("port", port_, std::string("/dev/ttyUSB0"));
+  nh_.param("baud_rate", baud_rate_, 230400);
+  nh_.param("frame_id", frame_id_, std::string("base_scan"));
+  nh_.param("lfcd_start", lfcdstart_, 1);
+  nh_.param("lfcd_stop", lfcdstop_, 2);
+  nh_.param("lfcd_start", lfcdstartstop_, lfcdstart_);
+
+  serial_.open(port_);
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
 
   if(lfcdstartstop_ == 1)
@@ -52,9 +61,21 @@ baud_rate_(baud_rate), lfcdstartstop_(lfcdstartstop), shutting_down_(false), ser
   {
     boost::asio::write(serial_, boost::asio::buffer("e", 1));
   }
+
+  accumulated_scan_.header.frame_id = frame_id_;
+  accumulated_scan_.angle_min = 0.0;
+  accumulated_scan_.angle_max = 2.0*M_PI;
+  accumulated_scan_.angle_increment = (2.0*M_PI/360.0);
+  accumulated_scan_.range_min = 0.12;
+  accumulated_scan_.range_max = 3.5;
+  accumulated_scan_.ranges.resize(360);
+  accumulated_scan_.intensities.resize(360);
+
+  laser_org_pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan_org", 100);
+  laser_pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan", 100);
 }
 
-void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
+void LFCDLaser::poll()
 {
   uint8_t temp_char;
   uint8_t start_count = 0;
@@ -62,8 +83,9 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
   boost::array<uint8_t, 2520> raw_bytes;
   uint8_t good_sets = 0;
   uint32_t motor_speed = 0;
-  rpms=0;
   int index;
+
+  scan_.header.frame_id = frame_id_;
 
   while (!shutting_down_ && !got_scan)
   {
@@ -88,13 +110,13 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
 
         boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[2], 2518));
 
-        scan->angle_min = 0.0;
-        scan->angle_max = 2.0*M_PI;
-        scan->angle_increment = (2.0*M_PI/360.0);
-        scan->range_min = 0.12;
-        scan->range_max = 3.5;
-        scan->ranges.resize(360);
-        scan->intensities.resize(360);
+        scan_.angle_min = 0.0;
+        scan_.angle_max = 2.0*M_PI;
+        scan_.angle_increment = (2.0*M_PI/360.0);
+        scan_.range_min = 0.12;
+        scan_.range_max = 3.5;
+        scan_.ranges.resize(360);
+        scan_.intensities.resize(360);
 
         //read data in sets of 6
         for(uint16_t i = 0; i < raw_bytes.size(); i=i+42)
@@ -103,7 +125,6 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
           {
             good_sets++;
             motor_speed += (raw_bytes[i+3] << 8) + raw_bytes[i+2]; //accumulate count for avg. time increment
-            rpms=(raw_bytes[i+3]<<8|raw_bytes[i+2])/10;
 
             for(uint16_t j = i+4; j < i+40; j=j+6)
             {
@@ -122,13 +143,19 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
               // uint16_t intensity = (byte3 << 8) + byte2;
               uint16_t range = (byte3 << 8) + byte2;
 
-              scan->ranges[359-index] = range / 1000.0;
-              scan->intensities[359-index] = intensity;
+              scan_.ranges[359-index] = accumulated_scan_.ranges[359-index] = range / 1000.0;
+              scan_.intensities[359-index] = accumulated_scan_.intensities[359-index] = intensity;
             }
           }
+          accumulated_scan_.time_increment = motor_speed/good_sets/1e8/60;
+          accumulated_scan_.header.stamp = ros::Time::now();
+          laser_pub_.publish(accumulated_scan_);
+          ros::spinOnce();
         }
-
-        scan->time_increment = motor_speed/good_sets/1e8;
+        scan_.time_increment = motor_speed/good_sets/1e8;
+        scan_.header.stamp = ros::Time::now();
+        laser_org_pub_.publish(scan_);
+        ros::spinOnce();
       }
       else
       {
@@ -137,54 +164,28 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
     }
   }
 }
+
+void LFCDLaser::close()
+{
+  shutting_down_ = true;
+  serial_.open(port_);
+  serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
+  boost::asio::write(serial_, boost::asio::buffer("e", 1));
+};
 };
 
-int main(int argc, char **argv)
+int main(int argc, char* argv[])
 {
-  ros::init(argc, argv, "hlds_laser_publisher");
-  ros::NodeHandle n;
-  ros::NodeHandle priv_nh("~");
-
-  std::string port;
-  int baud_rate;
-  std::string frame_id;
-  int lfcdstart;
-  int lfcdstop;
-
-  std_msgs::UInt16 rpms;
-
-  priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
-  priv_nh.param("baud_rate", baud_rate, 230400);
-  priv_nh.param("frame_id", frame_id, std::string("laser"));
-  priv_nh.param("lfcd_start", lfcdstart, 1);
-  priv_nh.param("lfcd_stop", lfcdstop, 2);
+  ros::init(argc, argv, "hlds_laser_segment_publisher");
 
   boost::asio::io_service io;
+  hls_lfcd_lds::LFCDLaser laser(io);
 
-  try
+  while (ros::ok())
   {
-    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, lfcdstart, io);
-    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
-    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms",1000);
-
-    while (ros::ok())
-    {
-      sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
-      scan->header.frame_id = frame_id;
-      laser.poll(scan);
-      scan->header.stamp = ros::Time::now();
-      rpms.data=laser.rpms;
-      laser_pub.publish(scan);
-      motor_pub.publish(rpms);
-    }
-    laser.close();
-
-    return 0;
+    laser.poll();
   }
-  catch (boost::system::system_error ex)
-  {
-    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, lfcdstop, io);
-    ROS_ERROR("Error instantiating laser object. Are you sure you have the correct port and baud rate? Error was %s", ex.what());
-    return -1;
-  }
+  laser.close();
+
+  return 0;
 }
