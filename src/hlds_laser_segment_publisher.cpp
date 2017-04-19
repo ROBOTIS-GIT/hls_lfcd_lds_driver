@@ -62,104 +62,62 @@ LFCDLaser::LFCDLaser(boost::asio::io_service& io)
     boost::asio::write(serial_, boost::asio::buffer("e", 1));
   }
 
-  accumulated_scan_.header.frame_id = frame_id_;
-  accumulated_scan_.angle_min = 0.0;
-  accumulated_scan_.angle_max = 2.0*M_PI;
-  accumulated_scan_.angle_increment = (2.0*M_PI/360.0);
-  accumulated_scan_.range_min = 0.12;
-  accumulated_scan_.range_max = 3.5;
-  accumulated_scan_.ranges.resize(360);
-  accumulated_scan_.intensities.resize(360);
+  scan_.header.frame_id = frame_id_;
+  scan_.angle_min = 0.0;
+  scan_.angle_max = 2.0*M_PI;
+  scan_.angle_increment = (2.0*M_PI/360.0);
+  scan_.range_min = 0.12;
+  scan_.range_max = 3.5;
+  scan_.ranges.resize(360);
+  scan_.intensities.resize(360);
 
-  laser_org_pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan_org", 100);
   laser_pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan", 100);
 }
 
 void LFCDLaser::poll()
 {
-  uint8_t temp_char;
-  uint8_t start_count = 0;
   bool got_scan = false;
-  boost::array<uint8_t, 2520> raw_bytes;
-  uint8_t good_sets = 0;
+  boost::array<uint8_t, 42> raw_bytes;
   uint32_t motor_speed = 0;
   int index;
 
-  scan_.header.frame_id = frame_id_;
 
   while (!shutting_down_ && !got_scan)
   {
-    // Wait until first data sync of frame: 0xFA, 0xA0
-    boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[start_count],1));
+    boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[0],1));
 
-    if(start_count == 0)
+    if(raw_bytes[0] == 0xFA)
     {
-      if(raw_bytes[start_count] == 0xFA)
+      got_scan = true;
+      boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[1], 41));
+
+      if(raw_bytes[1] >= 0xA0  && raw_bytes[1] <= 0xDB) // TODO: checksum
       {
-        start_count = 1;
-      }
-    }
-    else if(start_count == 1)
-    {
-      if(raw_bytes[start_count] == 0xA0)
-      {
-        start_count = 0;
+        int degree_count_num = 0;
 
-        // Now that entire start sequence has been found, read in the rest of the message
-        got_scan = true;
+        index = (raw_bytes[1] - 0xA0) * 6;
 
-        boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[2], 2518));
-
-        scan_.angle_min = 0.0;
-        scan_.angle_max = 2.0*M_PI;
-        scan_.angle_increment = (2.0*M_PI/360.0);
-        scan_.range_min = 0.12;
-        scan_.range_max = 3.5;
-        scan_.ranges.resize(360);
-        scan_.intensities.resize(360);
-
-        //read data in sets of 6
-        for(uint16_t i = 0; i < raw_bytes.size(); i=i+42)
+        for(uint16_t j = 4; j < 40; j = j + 6)
         {
-          if(raw_bytes[i] == 0xFA && raw_bytes[i+1] == (0xA0 + i / 42)) //&& CRC check
-          {
-            good_sets++;
-            motor_speed += (raw_bytes[i+3] << 8) + raw_bytes[i+2]; //accumulate count for avg. time increment
+          uint8_t byte0 = raw_bytes[j];
+          uint8_t byte1 = raw_bytes[j+1];
+          uint8_t byte2 = raw_bytes[j+2];
+          uint8_t byte3 = raw_bytes[j+3];
 
-            for(uint16_t j = i+4; j < i+40; j=j+6)
-            {
-              index = (6*i)/42 + (j-6-i)/6;
+          uint16_t intensity = (byte1 << 8) + byte0;
+          uint16_t range     = (byte3 << 8) + byte2;
 
-              // Four bytes per reading
-              uint8_t byte0 = raw_bytes[j];
-              uint8_t byte1 = raw_bytes[j+1];
-              uint8_t byte2 = raw_bytes[j+2];
-              uint8_t byte3 = raw_bytes[j+3];
+          scan_.ranges[359 - index - degree_count_num] = range / 1000.0;
+          scan_.intensities[359 - index - degree_count_num] = intensity;
 
-              // Remaining bits are the range in mm
-              uint16_t intensity = (byte1 << 8) + byte0;
-
-              // Last two bytes represent the uncertanty or intensity, might also be pixel area of target...
-              // uint16_t intensity = (byte3 << 8) + byte2;
-              uint16_t range = (byte3 << 8) + byte2;
-
-              scan_.ranges[359-index] = accumulated_scan_.ranges[359-index] = range / 1000.0;
-              scan_.intensities[359-index] = accumulated_scan_.intensities[359-index] = intensity;
-            }
-          }
-          accumulated_scan_.time_increment = motor_speed/good_sets/1e8/60;
-          accumulated_scan_.header.stamp = ros::Time::now();
-          laser_pub_.publish(accumulated_scan_);
-          ros::spinOnce();
+          degree_count_num++;
         }
-        scan_.time_increment = motor_speed/good_sets/1e8;
+
+        scan_.time_increment = 0.2 / 360; // 1sec / 5scan/ 360beam
+        scan_.scan_time = 0.2 / 60;
         scan_.header.stamp = ros::Time::now();
-        laser_org_pub_.publish(scan_);
+        laser_pub_.publish(scan_);
         ros::spinOnce();
-      }
-      else
-      {
-        start_count = 0;
       }
     }
   }
