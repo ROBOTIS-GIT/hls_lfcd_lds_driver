@@ -147,7 +147,7 @@ void LFCDLaser::poll()
               scan_.intensities[359-index] = accumulated_scan_.intensities[359-index] = intensity;
             }
           }
-          accumulated_scan_.time_increment = motor_speed/good_sets/1e8;
+          accumulated_scan_.time_increment = motor_speed/good_sets/1e8/60;
           accumulated_scan_.header.stamp = ros::Time::now();
           laser_pub_.publish(accumulated_scan_);
           ros::spinOnce();
