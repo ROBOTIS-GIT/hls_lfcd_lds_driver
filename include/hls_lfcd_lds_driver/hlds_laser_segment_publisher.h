@@ -75,12 +75,10 @@ class LFCDLaser
   ros::NodeHandle nh_;
 
   // ROS Topic Publishers
-  ros::Publisher laser_org_pub_;
   ros::Publisher laser_pub_;
 
   std::string frame_id_;
   sensor_msgs::LaserScan scan_;
-  sensor_msgs::LaserScan accumulated_scan_;
 
   std::string port_; ///< @brief The serial port the driver is attached to
   int baud_rate_; ///< @brief The baud rate for the serial connection
