@@ -142,7 +142,7 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
     }
   }
 }
-};
+}
 
 int main(int argc, char **argv)
 {
