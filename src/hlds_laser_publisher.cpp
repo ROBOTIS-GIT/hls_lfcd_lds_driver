@@ -54,6 +54,11 @@ baud_rate_(baud_rate), lfcdstartstop_(lfcdstartstop), shutting_down_(false), ser
   }
 }
 
+LFCDLaser::~LFCDLaser()
+{
+  boost::asio::write(serial_, boost::asio::buffer("e", 1));  // stop motor
+}
+
 void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
 {
   uint8_t temp_char;

@@ -53,7 +53,7 @@ class LFCDLaser
 	/**
 	* @brief Default destructor
 	*/
-	~LFCDLaser() {};
+	~LFCDLaser();
 
 	/**
 	* @brief Poll the laser to get a new scan. Blocks until a complete new scan is received or close is called.
