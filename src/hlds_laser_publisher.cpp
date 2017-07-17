@@ -107,7 +107,7 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
 
             for(uint16_t j = i+4; j < i+40; j=j+6)
             {
-              index = 6*(i/42) + (j-4-i)/6;  // 6*(i/42): beam num of the previous sets, (j-4-i)/6: beam num in the current set
+              index = 6*(i/42) + (j-4-i)/6;
 
               // Four bytes per reading
               uint8_t byte0 = raw_bytes[j];
