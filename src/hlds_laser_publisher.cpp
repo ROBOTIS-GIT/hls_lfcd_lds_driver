@@ -39,19 +39,17 @@
 
 namespace hls_lfcd_lds
 {
-LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, uint32_t lfcdstartstop, boost::asio::io_service& io): port_(port),
-baud_rate_(baud_rate), lfcdstartstop_(lfcdstartstop), shutting_down_(false), serial_(io, port_)
+LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::io_service& io)
+  : port_(port), baud_rate_(baud_rate), shutting_down_(false), serial_(io, port_)
 {
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
 
-  if(lfcdstartstop_ == 1)
-  {
-    boost::asio::write(serial_, boost::asio::buffer("b", 1));
-  }
-  else if(lfcdstartstop_ == 2)
-  {
-    boost::asio::write(serial_, boost::asio::buffer("e", 1));
-  }
+  boost::asio::write(serial_, boost::asio::buffer("b", 1));  // start motor
+}
+
+LFCDLaser::~LFCDLaser()
+{
+  boost::asio::write(serial_, boost::asio::buffer("e", 1));  // stop motor
 }
 
 void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
@@ -137,7 +135,7 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
     }
   }
 }
-};
+}
 
 int main(int argc, char **argv)
 {
@@ -148,22 +146,18 @@ int main(int argc, char **argv)
   std::string port;
   int baud_rate;
   std::string frame_id;
-  int lfcdstart;
-  int lfcdstop;
 
   std_msgs::UInt16 rpms;
 
   priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
   priv_nh.param("baud_rate", baud_rate, 230400);
   priv_nh.param("frame_id", frame_id, std::string("laser"));
-  priv_nh.param("lfcd_start", lfcdstart, 1);
-  priv_nh.param("lfcd_stop", lfcdstop, 2);
 
   boost::asio::io_service io;
 
   try
   {
-    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, lfcdstart, io);
+    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
     ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
     ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms",1000);
 
@@ -183,8 +177,7 @@ int main(int argc, char **argv)
   }
   catch (boost::system::system_error ex)
   {
-    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, lfcdstop, io);
-    ROS_ERROR("Error instantiating laser object. Are you sure you have the correct port and baud rate? Error was %s", ex.what());
+    ROS_ERROR("An exception was thrown: %s", ex.what());
     return -1;
   }
 }
