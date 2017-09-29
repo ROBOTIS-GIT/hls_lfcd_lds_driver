@@ -36,14 +36,27 @@
 #include <boost/asio.hpp>
 #include <hls_lfcd_lds_driver/lfcd_laser.h>
 #include <std_msgs/UInt16.h>
+#include "hls_lfcd_lds_driver/rpms_msg.h"
 
 namespace hls_lfcd_lds
 {
-LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::io_service& io)
-  : port_(port), baud_rate_(baud_rate), shutting_down_(false), serial_(io, port_)
+
+
+  float& inversePlacement(std::vector<float>&f,size_t idx){
+    return f[359-idx];
+  }
+
+  float& directPlacement(std::vector<float> &f,size_t idx){
+    return f[idx];
+  }
+
+
+LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::io_service& io, bool chron_ord)
+  : v_rpms(60),port_(port), baud_rate_(baud_rate), shutting_down_(false), serial_(io, port_), chron_ord(chron_ord),
+  scandataPlacer(chron_ord?directPlacement:inversePlacement)
+
 {
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
-
   boost::asio::write(serial_, boost::asio::buffer("b", 1));  // start motor
 }
 
@@ -62,7 +75,6 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
   uint32_t motor_speed = 0;
   rpms=0;
   int index;
-
   while (!shutting_down_ && !got_scan)
   {
     // Wait until first data sync of frame: 0xFA, 0xA0
@@ -86,15 +98,22 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
 
         boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[2], 2518));
 
-        scan->angle_min = 0.0;
-        scan->angle_max = 2.0*M_PI;
-        scan->angle_increment = (2.0*M_PI/360.0);
+        if (chron_ord){
+          scan->angle_min = 0;
+          scan->angle_max = -359*M_PI/180;
+          scan->angle_increment = -M_PI/180;
+        }else{
+          scan->angle_min = 0.0;
+          scan->angle_max = 2.0*M_PI;
+          scan->angle_increment = (2.0*M_PI/360.0);
+        }
         scan->range_min = 0.12;
         scan->range_max = 3.5;
         scan->ranges.resize(360);
         scan->intensities.resize(360);
 
         //read data in sets of 6
+        int rpms_index = 0;
         for(uint16_t i = 0; i < raw_bytes.size(); i=i+42)
         {
           if(raw_bytes[i] == 0xFA && raw_bytes[i+1] == (0xA0 + i / 42)) //&& CRC check
@@ -102,6 +121,7 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
             good_sets++;
             motor_speed += (raw_bytes[i+3] << 8) + raw_bytes[i+2]; //accumulate count for avg. time increment
             rpms=(raw_bytes[i+3]<<8|raw_bytes[i+2])/10;
+            v_rpms[rpms_index++] = (raw_bytes[i+3]<<8|raw_bytes[i+2]);//no division, no loss of accuracy
 
             for(uint16_t j = i+4; j < i+40; j=j+6)
             {
@@ -120,12 +140,11 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
               // uint16_t intensity = (byte3 << 8) + byte2;
               uint16_t range = (byte3 << 8) + byte2;
 
-              scan->ranges[359-index] = range / 1000.0;
-              scan->intensities[359-index] = intensity;
+              (*scandataPlacer)(scan->ranges,index) = range / 1000.0;
+              (*scandataPlacer)(scan->intensities,index) = intensity;
             }
           }
         }
-
         scan->time_increment = motor_speed/good_sets/1e8;
       }
       else
@@ -146,28 +165,32 @@ int main(int argc, char **argv)
   std::string port;
   int baud_rate;
   std::string frame_id;
+  bool chron_ord;
 
-  std_msgs::UInt16 rpms;
+  hls_lfcd_lds_driver::rpms_msg rpms;
+  rpms.rpms.resize(60);
 
   priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
   priv_nh.param("baud_rate", baud_rate, 230400);
   priv_nh.param("frame_id", frame_id, std::string("laser"));
+  priv_nh.param("chronological_order", chron_ord, false);  //odometry based unwarping needs to know the rays' order
 
   boost::asio::io_service io;
 
   try
   {
-    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
+    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io, chron_ord);
     ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
-    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms",1000);
+    ros::Publisher motor_pub = n.advertise<hls_lfcd_lds_driver::rpms_msg>("rpms",1000);
 
     while (ros::ok())
     {
       sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
       scan->header.frame_id = frame_id;
+      scan->header.stamp = ros::Time::now(); //the header contains the timestamp of the FIRST ray
       laser.poll(scan);
-      scan->header.stamp = ros::Time::now();
-      rpms.data=laser.rpms;
+      rpms.header.stamp = scan->header.stamp;
+      rpms.rpms = laser.v_rpms;
       laser_pub.publish(scan);
       motor_pub.publish(rpms);
     }

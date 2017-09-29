@@ -35,6 +35,7 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <string>
+#include <vector>
 
 namespace hls_lfcd_lds
 {
@@ -42,13 +43,14 @@ class LFCDLaser
 {
 public:
 	uint16_t rpms; ///< @brief RPMS derived from the rpm bytes in an LFCD packet
+	std::vector<uint16_t> v_rpms;
 	/**
 	* @brief Constructs a new LFCDLaser attached to the given serial port
 	* @param port The string for the serial port device to attempt to connect to, e.g. "/dev/ttyUSB0"
 	* @param baud_rate The baud rate to open the serial port at.
 	* @param io Boost ASIO IO Service to use when creating the serial port object
 	*/
-	LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::io_service& io);
+	LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::io_service& io, bool chron_ord);
 
 	/**
 	* @brief Default destructor
@@ -66,11 +68,14 @@ public:
 	*/
 	void close() { shutting_down_ = true; }
 
+	typedef float& (*ScandataPlacer)(std::vector<float>&,size_t);
+	ScandataPlacer scandataPlacer=NULL;
 private:
 	std::string port_; ///< @brief The serial port the driver is attached to
 	uint32_t baud_rate_; ///< @brief The baud rate for the serial connection
 	bool shutting_down_; ///< @brief Flag for whether the driver is supposed to be shutting down or not
 	boost::asio::serial_port serial_; ///< @brief Actual serial port object for reading/writing to the LFCD Laser Scanner
 	uint16_t motor_speed_; ///< @brief current motor speed as reported by the LFCD.
+	bool chron_ord;
 };
 }
