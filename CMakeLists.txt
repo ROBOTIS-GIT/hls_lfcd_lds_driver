@@ -10,6 +10,7 @@ project(hls_lfcd_lds_driver)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  message_generation
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -17,7 +18,14 @@ find_package(Boost REQUIRED COMPONENTS system)
 ################################################################################
 # Declare ROS messages, services and actions
 ################################################################################
-
+add_message_files(
+  FILES
+  rpms_msg.msg
+)
+ generate_messages(
+   DEPENDENCIES
+   std_msgs
+)
 ################################################################################
 ## Declare ROS dynamic reconfigure parameters
 ################################################################################
@@ -28,7 +36,7 @@ find_package(Boost REQUIRED COMPONENTS system)
 catkin_package(
    INCLUDE_DIRS include
    LIBRARIES hls_lfcd_lds_driver
-   CATKIN_DEPENDS roscpp sensor_msgs
+   CATKIN_DEPENDS roscpp sensor_msgs message_runtime
 )
 
 ################################################################################
