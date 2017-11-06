@@ -55,6 +55,7 @@ LFCDLaser::LFCDLaser(boost::asio::io_service& io)
 
   if(lfcdstartstop_ == 1)
   {
+    // Below command is not required after firmware upgrade (2017.10)
     boost::asio::write(serial_, boost::asio::buffer("b", 1));
   }
   else if(lfcdstartstop_ == 2)

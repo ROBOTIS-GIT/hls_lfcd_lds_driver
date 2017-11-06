@@ -44,6 +44,7 @@ LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::i
 {
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
 
+  // Below command is not required after firmware upgrade (2017.10)
   boost::asio::write(serial_, boost::asio::buffer("b", 1));  // start motor
 }
 
