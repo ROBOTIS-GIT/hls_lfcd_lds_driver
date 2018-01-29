@@ -8,6 +8,8 @@ ROS Packages Maintainer: [ROBOTIS](http://wiki.ros.org/ROBOTIS)
 
 Manufacturer of the LDS: [Hitachi-LG Data Storage](http://hlds.co.kr/v2/e_index.html)
 
+Manual for the LDS: [ROBOTIS e-Manual](http://emanual.robotis.com/docs/en/platform/turtlebot3/appendix_lds_01)
+
 # Overview
 
 The hls_lfcd_lds_driver package is a driver for HLS(Hitachi-LG Sensor) LFCD LDS(Laser Distance Sensor). The LDS is a sensor sending the data to Host for the simultaneous localization and mapping (SLAM). Simultaneously the detecting obstacle data can also be sent to Host. HLDS(Hitachi-LG Data Storage) is developing the technology for the moving platform sensor such as Robot Vacuum Cleaners, Home Robot, Robotics Lawn Mower Sensor, etc.
