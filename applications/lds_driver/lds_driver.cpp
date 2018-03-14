@@ -28,16 +28,12 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
- /* Authors: SP Kong, JH Yang */
+ /* Authors: SP Kong, JH Yang, Pyo */
  /* maintainer: Pyo */
 
-#include <ros/ros.h>
-#include <sensor_msgs/LaserScan.h>
-#include <boost/asio.hpp>
-#include <hls_lfcd_lds_driver/lfcd_laser.h>
-#include <std_msgs/UInt16.h>
+#include "lds_driver.h"
 
-namespace hls_lfcd_lds
+namespace lds
 {
 LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::io_service& io)
   : port_(port), baud_rate_(baud_rate), shutting_down_(false), serial_(io, port_)
@@ -53,7 +49,7 @@ LFCDLaser::~LFCDLaser()
   boost::asio::write(serial_, boost::asio::buffer("e", 1));  // stop motor
 }
 
-void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
+void LFCDLaser::poll()
 {
   uint8_t temp_char;
   uint8_t start_count = 0;
@@ -87,13 +83,13 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
 
         boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[2], 2518));
 
-        scan->angle_min = 0.0;
-        scan->angle_max = 2.0*M_PI;
-        scan->angle_increment = (2.0*M_PI/360.0);
-        scan->range_min = 0.12;
-        scan->range_max = 3.5;
-        scan->ranges.resize(360);
-        scan->intensities.resize(360);
+        // scan->angle_min = 0.0;
+        // scan->angle_max = 2.0*M_PI;
+        // scan->angle_increment = (2.0*M_PI/360.0);
+        // scan->range_min = 0.12;
+        // scan->range_max = 3.5;
+        // scan->ranges.resize(360);
+        // scan->intensities.resize(360);
 
         //read data in sets of 6
         for(uint16_t i = 0; i < raw_bytes.size(); i=i+42)
@@ -121,13 +117,14 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
               // uint16_t intensity = (byte3 << 8) + byte2;
               uint16_t range = (byte3 << 8) + byte2;
 
-              scan->ranges[359-index] = range / 1000.0;
-              scan->intensities[359-index] = intensity;
+              // scan->ranges[359-index] = range / 1000.0;
+              // scan->intensities[359-index] = intensity;
+              printf ("r[%d]=%f,",359-index, range / 1000.0);
             }
           }
         }
 
-        scan->time_increment = motor_speed/good_sets/1e8;
+        // scan->time_increment = motor_speed/good_sets/1e8;
       }
       else
       {
@@ -140,37 +137,20 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "hlds_laser_publisher");
-  ros::NodeHandle n;
-  ros::NodeHandle priv_nh("~");
-
   std::string port;
   int baud_rate;
-  std::string frame_id;
-
-  std_msgs::UInt16 rpms;
-
-  priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
-  priv_nh.param("baud_rate", baud_rate, 230400);
-  priv_nh.param("frame_id", frame_id, std::string("laser"));
-
+  uint16_t rpms;
+  port = "/dev/ttyUSB0";
+  baud_rate = 230400;
   boost::asio::io_service io;
 
   try
   {
-    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
-    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
-    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms",1000);
+    lds::LFCDLaser laser(port, baud_rate, io);
 
-    while (ros::ok())
+    while (1)
     {
-      sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
-      scan->header.frame_id = frame_id;
-      laser.poll(scan);
-      scan->header.stamp = ros::Time::now();
-      rpms.data=laser.rpms;
-      laser_pub.publish(scan);
-      motor_pub.publish(rpms);
+      laser.poll();
     }
     laser.close();
 
@@ -178,7 +158,7 @@ int main(int argc, char **argv)
   }
   catch (boost::system::system_error ex)
   {
-    ROS_ERROR("An exception was thrown: %s", ex.what());
+    printf("An exception was thrown: %s", ex.what());
     return -1;
   }
 }
