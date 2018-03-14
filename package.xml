@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>hls_lfcd_lds_driver</name>
   <version>0.1.4</version>
   <description>
@@ -9,17 +9,14 @@
   <license>BSD</license>
   <author email="thlim@robotis.com">Darby Lim</author>
   <author email="pyo@robotis.com">Pyo</author>
-  <author email="jhyang@hlds.co.kr">JH Yang</author>
-  <author email="ksp123@hlds.co.kr">SP Kong</author>
+  <author>JH Yang</author>
+  <author>SP Kong</author>
   <maintainer email="pyo@robotis.com">Pyo</maintainer>
   <url type="bugtracker">https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/issues</url>
   <url type="repository">https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver</url>
   <url type="website">http://wiki.ros.org/hls_lfcd_lds_driver</url>
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <run_depend>boost</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <export></export>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>boost</depend>
 </package>
