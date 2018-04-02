@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2016, Hitachi-LG Data Storage
+* Copyright (c) 2017, ROBOTIS
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -35,7 +36,6 @@
 #include <sensor_msgs/LaserScan.h>
 #include <boost/asio.hpp>
 #include <hls_lfcd_lds_driver/hlds_laser_segment_publisher.h>
-
 
 namespace hls_lfcd_lds
 {

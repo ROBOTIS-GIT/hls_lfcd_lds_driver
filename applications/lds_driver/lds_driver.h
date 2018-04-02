@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2016, Hitachi-LG Data Storage
+* Copyright (c) 2017, ROBOTIS
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
