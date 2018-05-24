@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2016, Hitachi-LG Data Storage
+* Copyright (c) 2017, ROBOTIS
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -31,10 +32,10 @@
  /* Authors: SP Kong, JH Yang */
  /* maintainer: Pyo */
 
+#include <string>
 #include <sensor_msgs/LaserScan.h>
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <string>
 
 namespace hls_lfcd_lds
 {
