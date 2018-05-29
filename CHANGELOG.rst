@@ -2,6 +2,14 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.0.0 (2018-05-29)
+------------------
+* modified max-range to avoid fencepost error.
+* merged pull request `#27 <https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/issues/27>`_ from skasperski/master
+  Corrected max-range to avoid fencepost error.
+* merged pull request `#29 <https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/issues/29>`_ `#28 <https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/issues/28>`_ `#24 <https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/issues/24>`_
+* Contributors: Gilbert, Sebastian Kasperski, Pyo
+
 0.1.5 (2018-03-14)
 ------------------
 * added non-ROS applications for LDS (linux, windows, mac)
