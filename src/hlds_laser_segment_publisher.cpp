@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2016, Hitachi-LG Data Storage
+* Copyright (c) 2017, ROBOTIS
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -36,7 +37,6 @@
 #include <boost/asio.hpp>
 #include <hls_lfcd_lds_driver/hlds_laser_segment_publisher.h>
 
-
 namespace hls_lfcd_lds
 {
 LFCDLaser::LFCDLaser(boost::asio::io_service& io)
@@ -64,9 +64,9 @@ LFCDLaser::LFCDLaser(boost::asio::io_service& io)
   }
 
   scan_.header.frame_id = frame_id_;
-  scan_.angle_min = 0.0;
-  scan_.angle_max = 2.0*M_PI;
   scan_.angle_increment = (2.0*M_PI/360.0);
+  scan_.angle_min = 0.0;
+  scan_.angle_max = 2.0*M_PI-scan_.angle_increment;
   scan_.range_min = 0.12;
   scan_.range_max = 3.5;
   scan_.ranges.resize(360);

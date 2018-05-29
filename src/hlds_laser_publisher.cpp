@@ -1,5 +1,6 @@
 /*******************************************************************************
 * Copyright (c) 2016, Hitachi-LG Data Storage
+* Copyright (c) 2017, ROBOTIS
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -32,10 +33,10 @@
  /* maintainer: Pyo */
 
 #include <ros/ros.h>
+#include <std_msgs/UInt16.h>
 #include <sensor_msgs/LaserScan.h>
 #include <boost/asio.hpp>
 #include <hls_lfcd_lds_driver/lfcd_laser.h>
-#include <std_msgs/UInt16.h>
 
 namespace hls_lfcd_lds
 {
@@ -87,9 +88,9 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
 
         boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[2], 2518));
 
-        scan->angle_min = 0.0;
-        scan->angle_max = 2.0*M_PI;
         scan->angle_increment = (2.0*M_PI/360.0);
+        scan->angle_min = 0.0;
+        scan->angle_max = 2.0*M_PI-scan->angle_increment;
         scan->range_min = 0.12;
         scan->range_max = 3.5;
         scan->ranges.resize(360);
