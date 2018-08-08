@@ -29,75 +29,66 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
-/* Authors: SP Kong, JH Yang, Pyo */
-/* maintainer: Pyo */
+ /* Authors: SP Kong, JH Yang */
+ /* maintainer: Pyo */
 
 #include <ros/ros.h>
+#include <std_msgs/UInt16.h>
 #include <sensor_msgs/LaserScan.h>
 #include <boost/asio.hpp>
-#include <hls_lfcd_lds_driver/hlds_laser_segment_publisher.h>
+#include <hls_lfcd_lds_driver/lfcd_laser.h>
 
 namespace hls_lfcd_lds
 {
-LFCDLaser::LFCDLaser(boost::asio::io_service& io)
-: serial_(io),
-  shutting_down_(false)
+LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::io_service& io)
+  : port_(port), baud_rate_(baud_rate), shutting_down_(false), serial_(io, port_)
 {
-  nh_.param("port", port_, std::string("/dev/ttyUSB0"));
-  nh_.param("baud_rate", baud_rate_, 230400);
-  nh_.param("frame_id", frame_id_, std::string("base_scan"));
-  nh_.param("lfcd_start", lfcdstart_, 1);
-  nh_.param("lfcd_stop", lfcdstop_, 2);
-  nh_.param("lfcd_start", lfcdstartstop_, lfcdstart_);
-
-  serial_.open(port_);
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
 
-  if(lfcdstartstop_ == 1)
-  {
-    // Below command is not required after firmware upgrade (2017.10)
-    boost::asio::write(serial_, boost::asio::buffer("b", 1));
-  }
-  else if(lfcdstartstop_ == 2)
-  {
-    boost::asio::write(serial_, boost::asio::buffer("e", 1));
-  }
-
-  scan_.header.frame_id = frame_id_;
-  scan_.angle_increment = (2.0*M_PI/360.0);
-  scan_.angle_min = 0.0;
-  scan_.angle_max = 2.0*M_PI-scan_.angle_increment;
-  scan_.range_min = 0.12;
-  scan_.range_max = 3.5;
-  scan_.ranges.resize(360);
-  scan_.intensities.resize(360);
-
-  laser_pub_ = nh_.advertise<sensor_msgs::LaserScan>("scan", 100);
+  // Below command is not required after firmware upgrade (2017.10)
+  boost::asio::write(serial_, boost::asio::buffer("b", 1));  // start motor
 }
 
-void LFCDLaser::poll()
+LFCDLaser::~LFCDLaser()
 {
+  boost::asio::write(serial_, boost::asio::buffer("e", 1));  // stop motor
+}
+
+// This sensor is currently transmitting data every 6 degrees. 
+// It doesn't transmit whole 360 degrees of data. 
+// The improved code below transfers data at a faster rate than the previous one, 
+// but it is updated with only 6 degrees data. The bandwidth also increases 60 times. (15KB/s > 900KB/s)
+void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
+{
+  uint8_t temp_char;
   bool got_scan = false;
   boost::array<uint8_t, 42> raw_bytes;
+  uint8_t good_sets = 0;
   uint32_t motor_speed = 0;
+  rpms=0;
   int index;
-
 
   while (!shutting_down_ && !got_scan)
   {
-    boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[0],1));
+    // Wait until first data sync of frame: 0xFA, 0xA0
+    boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[0], 1));
 
     if(raw_bytes[0] == 0xFA)
     {
+      // Now that entire start sequence has been found, read in the rest of the message
       got_scan = true;
       boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[1], 41));
-
-      if(raw_bytes[1] >= 0xA0  && raw_bytes[1] <= 0xDB) // TODO: checksum
+      
+      if(raw_bytes[1] >= 0xA0  && raw_bytes[1] <= 0xDB)
       {
         int degree_count_num = 0;
-
         index = (raw_bytes[1] - 0xA0) * 6;
+        good_sets++;
 
+        motor_speed += (raw_bytes[3] << 8) + raw_bytes[2]; //accumulate count for avg. time increment
+        rpms=(raw_bytes[3]<<8|raw_bytes[2])/10;
+
+        //read data in sets of 6
         for(uint16_t j = 4; j < 40; j = j + 6)
         {
           uint8_t byte0 = raw_bytes[j];
@@ -108,43 +99,68 @@ void LFCDLaser::poll()
           uint16_t intensity = (byte1 << 8) + byte0;
           uint16_t range     = (byte3 << 8) + byte2;
 
-          scan_.ranges[359 - index - degree_count_num] = range / 1000.0;
-          scan_.intensities[359 - index - degree_count_num] = intensity;
+          scan->ranges[359 - index - degree_count_num] = range / 1000.0;
+          scan->intensities[359 - index - degree_count_num] = intensity;
 
           degree_count_num++;
-        }
+        }      
 
-        scan_.time_increment = 0.2 / 360; // 1sec / 5scan/ 360beam
-        scan_.scan_time = 0.2 / 60;
-        scan_.header.stamp = ros::Time::now();
-        laser_pub_.publish(scan_);
-        ros::spinOnce();
+        scan->time_increment = motor_speed/good_sets/1e8;
       }
     }
   }
 }
+}
 
-void LFCDLaser::close()
-{
-  shutting_down_ = true;
-  serial_.open(port_);
-  serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
-  boost::asio::write(serial_, boost::asio::buffer("e", 1));
-};
-};
-
-int main(int argc, char* argv[])
+int main(int argc, char **argv)
 {
   ros::init(argc, argv, "hlds_laser_segment_publisher");
+  ros::NodeHandle n;
+  ros::NodeHandle priv_nh("~");
+
+  std::string port;
+  int baud_rate;
+  std::string frame_id;
+
+  std_msgs::UInt16 rpms;
+
+  priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
+  priv_nh.param("baud_rate", baud_rate, 230400);
+  priv_nh.param("frame_id", frame_id, std::string("laser"));
 
   boost::asio::io_service io;
-  hls_lfcd_lds::LFCDLaser laser(io);
 
-  while (ros::ok())
+  try
   {
-    laser.poll();
-  }
-  laser.close();
+    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
+    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
+    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms",1000);
+    sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
 
-  return 0;
+    scan->header.frame_id = frame_id;
+    scan->angle_increment = (2.0*M_PI/360.0);
+    scan->angle_min = 0.0;
+    scan->angle_max = 2.0*M_PI-scan->angle_increment;
+    scan->range_min = 0.12;
+    scan->range_max = 3.5;
+    scan->ranges.resize(360);
+    scan->intensities.resize(360);
+
+    while (ros::ok())
+    {
+      laser.poll(scan);
+      scan->header.stamp = ros::Time::now();
+      rpms.data=laser.rpms;
+      laser_pub.publish(scan);
+      motor_pub.publish(rpms);
+    }
+    laser.close();
+
+    return 0;
+  }
+  catch (boost::system::system_error ex)
+  {
+    ROS_ERROR("An exception was thrown: %s", ex.what());
+    return -1;
+  }
 }
