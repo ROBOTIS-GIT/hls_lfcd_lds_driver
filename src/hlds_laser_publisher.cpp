@@ -29,14 +29,15 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
- /* Authors: SP Kong, JH Yang */
+ /* Authors: Pyo, Darby, SP Kong, JH Yang */
  /* maintainer: Pyo */
 
-#include <ros/ros.h>
-#include <std_msgs/UInt16.h>
-#include <sensor_msgs/LaserScan.h>
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp/time_source.hpp>
+#include <std_msgs/msg/u_int16.hpp>
+#include <sensor_msgs/msg/laser_scan.hpp>
 #include <boost/asio.hpp>
-#include <hls_lfcd_lds_driver/lfcd_laser.h>
+#include <hls_lfcd_lds_driver/lfcd_laser.hpp>
 
 namespace hls_lfcd_lds
 {
@@ -47,6 +48,11 @@ LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::i
 
   // Below command is not required after firmware upgrade (2017.10)
   boost::asio::write(serial_, boost::asio::buffer("b", 1));  // start motor
+
+  // // https://github.com/ros2/rmw/blob/release-latest/rmw/include/rmw/qos_profiles.h
+  // rmw_qos_profile_t lds_qos_profile = rmw_qos_profile_sensor_data;
+
+  // laser_pub_ = node->create_publisher<std_msgs::msg::Float32>("scan", lds_qos_profile);
 }
 
 LFCDLaser::~LFCDLaser()
@@ -54,7 +60,7 @@ LFCDLaser::~LFCDLaser()
   boost::asio::write(serial_, boost::asio::buffer("e", 1));  // stop motor
 }
 
-void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
+void LFCDLaser::poll(sensor_msgs::msg::LaserScan::Ptr scan)
 {
   uint8_t temp_char;
   uint8_t start_count = 0;
@@ -115,11 +121,7 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
               uint8_t byte2 = raw_bytes[j+2];
               uint8_t byte3 = raw_bytes[j+3];
 
-              // Remaining bits are the range in mm
               uint16_t intensity = (byte1 << 8) + byte0;
-
-              // Last two bytes represent the uncertanty or intensity, might also be pixel area of target...
-              // uint16_t intensity = (byte3 << 8) + byte2;
               uint16_t range = (byte3 << 8) + byte2;
 
               scan->ranges[359-index] = range / 1000.0;
@@ -141,37 +143,56 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "hlds_laser_publisher");
-  ros::NodeHandle n;
-  ros::NodeHandle priv_nh("~");
+  rclcpp::init(argc, argv);
+
+  auto node = rclcpp::Node::make_shared("hlds_laser_publisher");
+  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr laser_pub;
+  boost::asio::io_service io;
+
+  // hls_lfcd_lds::LFCDLaser laser(node, io);
+
+  // rclcpp::spin(node);
+
+  // rclcpp::shutdown();
+  
+  // return 0;
+
+  // auto n       = rclcpp::Node::make_shared("hlds_laser_publisher");
+  // auto priv_nh = rclcpp::Node::make_shared("hlds_laser_publisher_");
 
   std::string port;
-  int baud_rate;
   std::string frame_id;
+  //std_msgs::msg::UInt16 rpms;
+  int baud_rate;
 
-  std_msgs::UInt16 rpms;
+  port = "/dev/ttyUSB0";
+  frame_id = "laser";
+  baud_rate = 230400;
+  // priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
+  // priv_nh.param("baud_rate", baud_rate, 230400);
+  // priv_nh.param("frame_id", frame_id, std::string("laser"));
 
-  priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
-  priv_nh.param("baud_rate", baud_rate, 230400);
-  priv_nh.param("frame_id", frame_id, std::string("laser"));
 
-  boost::asio::io_service io;
 
   try
   {
-    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
-    ros::Publisher laser_pub = n.advertise<sensor_msgs::LaserScan>("scan", 1000);
-    ros::Publisher motor_pub = n.advertise<std_msgs::UInt16>("rpms",1000);
+    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);   
+    laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan");
+    //ros::Publisher laser_pub = n.advertise<sensor_msgs::msg::LaserScan>("scan", 1000);
+    //ros::Publisher motor_pub = n.advertise<std_msgs::msg::UInt16>("rpms",1000);
 
-    while (ros::ok())
+    while (rclcpp::ok())
     {
-      sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
+      auto scan = std::make_shared<sensor_msgs::msg::LaserScan>();
       scan->header.frame_id = frame_id;
       laser.poll(scan);
-      scan->header.stamp = ros::Time::now();
-      rpms.data=laser.rpms;
-      laser_pub.publish(scan);
-      motor_pub.publish(rpms);
+      rclcpp::TimeSource ts(node);
+      rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
+      ts.attachClock(clock);
+      scan->header.stamp = clock->now();
+      // rpms.data=laser.rpms;
+      laser_pub->publish(scan);
+      // motor_pub.publish(rpms);
     }
     laser.close();
 
@@ -179,7 +200,7 @@ int main(int argc, char **argv)
   }
   catch (boost::system::system_error ex)
   {
-    ROS_ERROR("An exception was thrown: %s", ex.what());
+    //ROS_ERROR("An exception was thrown: %s", ex.what());
     return -1;
   }
 }
