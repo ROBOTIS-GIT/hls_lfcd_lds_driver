@@ -46,13 +46,7 @@ LFCDLaser::LFCDLaser(const std::string& port, uint32_t baud_rate, boost::asio::i
 {
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
 
-  // Below command is not required after firmware upgrade (2017.10)
   boost::asio::write(serial_, boost::asio::buffer("b", 1));  // start motor
-
-  // // https://github.com/ros2/rmw/blob/release-latest/rmw/include/rmw/qos_profiles.h
-  // rmw_qos_profile_t lds_qos_profile = rmw_qos_profile_sensor_data;
-
-  // laser_pub_ = node->create_publisher<std_msgs::msg::Float32>("scan", lds_qos_profile);
 }
 
 LFCDLaser::~LFCDLaser()
@@ -60,9 +54,8 @@ LFCDLaser::~LFCDLaser()
   boost::asio::write(serial_, boost::asio::buffer("e", 1));  // stop motor
 }
 
-void LFCDLaser::poll(sensor_msgs::msg::LaserScan::Ptr scan)
+void LFCDLaser::poll(sensor_msgs::msg::LaserScan::SharedPtr scan)
 {
-  uint8_t temp_char;
   uint8_t start_count = 0;
   bool got_scan = false;
   boost::array<uint8_t, 2520> raw_bytes;
@@ -149,37 +142,18 @@ int main(int argc, char **argv)
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr laser_pub;
   boost::asio::io_service io;
 
-  // hls_lfcd_lds::LFCDLaser laser(node, io);
-
-  // rclcpp::spin(node);
-
-  // rclcpp::shutdown();
-  
-  // return 0;
-
-  // auto n       = rclcpp::Node::make_shared("hlds_laser_publisher");
-  // auto priv_nh = rclcpp::Node::make_shared("hlds_laser_publisher_");
-
   std::string port;
   std::string frame_id;
-  //std_msgs::msg::UInt16 rpms;
   int baud_rate;
 
   port = "/dev/ttyUSB0";
   frame_id = "laser";
   baud_rate = 230400;
-  // priv_nh.param("port", port, std::string("/dev/ttyUSB0"));
-  // priv_nh.param("baud_rate", baud_rate, 230400);
-  // priv_nh.param("frame_id", frame_id, std::string("laser"));
-
-
 
   try
   {
     hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);   
     laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan");
-    //ros::Publisher laser_pub = n.advertise<sensor_msgs::msg::LaserScan>("scan", 1000);
-    //ros::Publisher motor_pub = n.advertise<std_msgs::msg::UInt16>("rpms",1000);
 
     while (rclcpp::ok())
     {
@@ -190,9 +164,7 @@ int main(int argc, char **argv)
       rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
       ts.attachClock(clock);
       scan->header.stamp = clock->now();
-      // rpms.data=laser.rpms;
       laser_pub->publish(scan);
-      // motor_pub.publish(rpms);
     }
     laser.close();
 

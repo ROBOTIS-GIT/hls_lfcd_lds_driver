@@ -60,7 +60,7 @@ public:
 	* @brief Poll the laser to get a new scan. Blocks until a complete new scan is received or close is called.
 	* @param scan LaserScan message pointer to fill in with the scan. The caller is responsible for filling in the ROS timestamp and frame_id
 	*/
-	void poll(sensor_msgs::msg::LaserScan::Ptr scan);
+	void poll(sensor_msgs::msg::LaserScan::SharedPtr scan);
 
 	/**
 	* @brief Close the driver down and prevent the polling loop from advancing
