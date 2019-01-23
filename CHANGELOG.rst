@@ -2,6 +2,13 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.0 (2019-01-23)
+------------------
+* added lpthread library in Makefile
+* added CI for ROS melodic
+* modified hlds_laser_segment_publisher
+* Contributors: Gilbert, Pyo
+
 1.0.0 (2018-05-29)
 ------------------
 * modified max-range to avoid fencepost error.
