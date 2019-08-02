@@ -152,8 +152,8 @@ int main(int argc, char **argv)
 
   try
   {
-    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);   
-    laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan");
+    hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
+    laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::QoS(10));
 
     while (rclcpp::ok())
     {
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
       rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
       ts.attachClock(clock);
       scan->header.stamp = clock->now();
-      laser_pub->publish(scan);
+      laser_pub->publish(*scan);
     }
     laser.close();
 
