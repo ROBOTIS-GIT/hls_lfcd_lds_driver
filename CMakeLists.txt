@@ -22,27 +22,6 @@ find_package(sensor_msgs REQUIRED)
 find_package(Boost REQUIRED system)
 
 ################################################################################
-# Setup for python modules and scripts
-################################################################################
-
-################################################################################
-# Declare ROS messages, services and actions
-################################################################################
-
-################################################################################
-## Declare ROS dynamic reconfigure parameters
-################################################################################
-
-################################################################################
-# Declare ament specific configuration to be passed to dependent projects
-################################################################################
-# catkin_package(
-#   INCLUDE_DIRS include
-#   CATKIN_DEPENDS roscpp std_msgs sensor_msgs
-#   DEPENDS Boost
-# )
-
-################################################################################
 # Build
 ################################################################################
 include_directories(
@@ -51,7 +30,7 @@ include_directories(
 )
 
 add_executable(hlds_laser_publisher	src/hlds_laser_publisher.cpp)
-ament_target_dependencies(hlds_laser_publisher 
+ament_target_dependencies(hlds_laser_publisher
   rclcpp
   std_msgs
   sensor_msgs
@@ -75,15 +54,6 @@ install(
   DIRECTORY launch rviz
   DESTINATION share/${PROJECT_NAME}
 )
-
-################################################################################
-# Test
-################################################################################
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  set(ament_cmake_copyright_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
 
 ################################################################################
 # Macro for ament package
