@@ -146,14 +146,18 @@ int main(int argc, char **argv)
   std::string frame_id;
   int baud_rate;
 
-  port = "/dev/ttyUSB0";
-  frame_id = "laser";
+  this->declare_parameter("port");
+  this->declare_parameter("frame_id");
+
+  this->get_parameter_or<std::string>("port", port, "/dev/ttyUSB0");
+  this->get_parameter_or<std::string>("frame_id", frame_id, "laser");
+
   baud_rate = 230400;
 
   try
   {
     hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
-    laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::QoS(10));
+    laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::QoS(rclcpp::SensorDataQoS()));
 
     while (rclcpp::ok())
     {
