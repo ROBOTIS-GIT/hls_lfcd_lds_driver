@@ -144,11 +144,11 @@ int main(int argc, char **argv)
   std::string frame_id;
   int baud_rate;
 
-  this->declare_parameter("port");
-  this->declare_parameter("frame_id");
+  node->declare_parameter("port");
+  node->declare_parameter("frame_id");
 
-  this->get_parameter_or<std::string>("port", port, "/dev/ttyUSB0");
-  this->get_parameter_or<std::string>("frame_id", frame_id, "laser");
+  node->get_parameter_or<std::string>("port", port, "/dev/ttyUSB0");
+  node->get_parameter_or<std::string>("frame_id", frame_id, "laser");
 
   baud_rate = 230400;
 
