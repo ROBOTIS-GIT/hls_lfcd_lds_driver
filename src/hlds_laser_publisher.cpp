@@ -152,6 +152,9 @@ int main(int argc, char **argv)
 
   baud_rate = 230400;
 
+  RCLCPP_INFO(node->get_logger(), "Init hlds_laser_publisher Node Main");
+  RCLCPP_INFO(node->get_logger(), "port : %s frame_id : %s", port.c_str(), frame_id.c_str());
+
   try
   {
     hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
