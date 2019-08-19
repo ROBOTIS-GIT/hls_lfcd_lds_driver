@@ -17,7 +17,6 @@ endif()
 ################################################################################
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(Boost REQUIRED system)
 
@@ -30,29 +29,23 @@ include_directories(
 )
 
 add_executable(hlds_laser_publisher	src/hlds_laser_publisher.cpp)
+target_link_libraries(hlds_laser_publisher ${Boost_LIBRARIES})
 ament_target_dependencies(hlds_laser_publisher
   rclcpp
   std_msgs
   sensor_msgs
 )
-target_link_libraries(hlds_laser_publisher ${Boost_LIBRARIES})
 
 ################################################################################
 # Install
 ################################################################################
+install(DIRECTORY launch rviz
+  DESTINATION share/${PROJECT_NAME}
+)
+
 install(
   TARGETS hlds_laser_publisher
   RUNTIME DESTINATION lib/${PROJECT_NAME}
-)
-
-install(
-  DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION include/${PROJECT_NAME}
-)
-
-install(
-  DIRECTORY launch rviz
-  DESTINATION share/${PROJECT_NAME}
 )
 
 ################################################################################
