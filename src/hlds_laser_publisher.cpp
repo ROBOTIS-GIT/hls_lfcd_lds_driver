@@ -29,12 +29,10 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
- /* Authors: Pyo, Darby, SP Kong, JH Yang */
+ /* Authors: Pyo, Darby Lim, SP Kong, JH Yang */
  /* maintainer: Pyo */
 
 #include <rclcpp/rclcpp.hpp>
-#include <rclcpp/time_source.hpp>
-#include <std_msgs/msg/u_int16.hpp>
 #include <sensor_msgs/msg/laser_scan.hpp>
 #include <boost/asio.hpp>
 #include <hls_lfcd_lds_driver/lfcd_laser.hpp>
@@ -146,24 +144,28 @@ int main(int argc, char **argv)
   std::string frame_id;
   int baud_rate;
 
-  port = "/dev/ttyUSB0";
-  frame_id = "laser";
+  node->declare_parameter("port");
+  node->declare_parameter("frame_id");
+
+  node->get_parameter_or<std::string>("port", port, "/dev/ttyUSB0");
+  node->get_parameter_or<std::string>("frame_id", frame_id, "laser");
+
   baud_rate = 230400;
+
+  RCLCPP_INFO(node->get_logger(), "Init hlds_laser_publisher Node Main");
+  RCLCPP_INFO(node->get_logger(), "port : %s frame_id : %s", port.c_str(), frame_id.c_str());
 
   try
   {
     hls_lfcd_lds::LFCDLaser laser(port, baud_rate, io);
-    laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::QoS(10));
+    laser_pub = node->create_publisher<sensor_msgs::msg::LaserScan>("scan", rclcpp::QoS(rclcpp::SensorDataQoS()));
 
     while (rclcpp::ok())
     {
       auto scan = std::make_shared<sensor_msgs::msg::LaserScan>();
       scan->header.frame_id = frame_id;
       laser.poll(scan);
-      rclcpp::TimeSource ts(node);
-      rclcpp::Clock::SharedPtr clock = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
-      ts.attachClock(clock);
-      scan->header.stamp = clock->now();
+      scan->header.stamp = node->now();
       laser_pub->publish(*scan);
     }
     laser.close();
