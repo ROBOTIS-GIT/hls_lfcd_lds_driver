@@ -5,7 +5,7 @@ Changelog for package hls_lfcd_lds_driver
 2.0.0 (2019-08-20)
 ------------------
 * Supported ROS 2 Dashing Diademata
-* Added parameters
+* Added parameter for initilization and modified qos
 * Reduced scope to boost-system dependency
 * Fixed build warnings in ROS2 Dashing
 * Contributors: Emerson Knapp, Darby Lim, Pyo
