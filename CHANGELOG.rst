@@ -2,6 +2,12 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.1 (2020-07-13)
+------------------
+* ROS 2 Eloquent Elusor supported
+* ROS 2 Foxy Fitzroy supported
+* Contributors: Will Son
+
 2.0.0 (2019-08-20)
 ------------------
 * Supported ROS 2 Dashing Diademata
