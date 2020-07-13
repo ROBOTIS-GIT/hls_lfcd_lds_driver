@@ -2,6 +2,11 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.1 (2020-07-13)
+------------------
+* ROS 1 Noetic Ninjemys support
+* Contributors: Will Son
+
 1.1.0 (2019-01-23)
 ------------------
 * added lpthread library in Makefile
