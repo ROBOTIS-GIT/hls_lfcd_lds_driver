@@ -2,14 +2,13 @@
 <img src="http://emanual.robotis.com/assets/images/platform/turtlebot3/appendix_lds/lds.png" width="400">
 
 ## ROS 1 Packages for LDS-01 Driver
-|develop|master|Kinetic + Ubuntu Xenial|Melodic + Ubuntu Bionic|
-|:---:|:---:|:---:|:---:|
-|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=develop)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=master)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=kinetic-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=melodic-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|
-
+|develop|master|Kinetic + Ubuntu Xenial|Melodic + Ubuntu Bionic|Noetic + Ubuntu Focal|
+|:---:|:---:|:---:|:---:|:---:|
+|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=develop)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=master)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=kinetic-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=melodic-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=noetic-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|
 ## ROS 2 Packages for LDS-01 Driver
-|ros2-devel|ros2|Dashing + Ubuntu Bionic|
-|:---:|:---:|:---:|
-|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=ros2-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=ros2)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=dashing-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|
+|ros2-devel|ros2|Dashing + Ubuntu Bionic|Eloquent + Ubuntu Bionic|Foxy + Ubuntu Foxy|
+|:---:|:---:|:---:|:---:|:---:|
+|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=ros2-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=ros2)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=dashing-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=eloquent-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|[![Build Status](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver.svg?branch=foxy-devel)](https://travis-ci.org/ROBOTIS-GIT/hls_lfcd_lds_driver)|
 
 ## ROBOTIS e-Manual for TurtleBot3 and LDS-01
 - [ROBOTIS e-Manual for TurtleBot3 and LDS-01](http://turtlebot3.robotis.com/)
