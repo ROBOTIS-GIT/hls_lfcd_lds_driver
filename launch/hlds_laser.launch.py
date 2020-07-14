@@ -30,6 +30,7 @@ def generate_launch_description():
     port = LaunchConfiguration('port', default='/dev/ttyUSB0')
 
     frame_id = LaunchConfiguration('frame_id', default='laser')
+    namespace = LaunchConfiguration('namespace')
 
     return LaunchDescription([
 
@@ -39,6 +40,10 @@ def generate_launch_description():
             description='Specifying usb port to connected lidar'),
 
         DeclareLaunchArgument(
+            'namespace', default_value='',
+            description='Top-level namespace'),
+
+        DeclareLaunchArgument(
             'frame_id',
             default_value=frame_id,
             description='Specifying frame_id of lidar. Default frame_id is \'laser\''),
@@ -46,6 +51,7 @@ def generate_launch_description():
         Node(
             package='hls_lfcd_lds_driver',
             node_executable='hlds_laser_publisher',
+            node_namespace=namespace,
             node_name='hlds_laser_publisher',
             parameters=[{'port': port, 'frame_id': frame_id}],
             output='screen'),
