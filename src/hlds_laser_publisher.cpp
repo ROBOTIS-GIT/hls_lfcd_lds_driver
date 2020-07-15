@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 
     return 0;
   }
-  catch (boost::system::system_error ex)
+  catch (boost::system::system_error& ex)
   {
     //ROS_ERROR("An exception was thrown: %s", ex.what());
     return -1;
