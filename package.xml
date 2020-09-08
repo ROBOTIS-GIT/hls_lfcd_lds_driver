@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>hls_lfcd_lds_driver</name>
-  <version>1.1.1</version>
+  <version>1.1.2</version>
   <description>
     ROS package for LDS(HLS-LFCD2).
     The LDS (Laser Distance Sensor) is a sensor sending the data to Host for the simultaneous localization and mapping (SLAM). Simultaneously the detecting obstacle data can also be sent to Host. HLDS(Hitachi-LG Data Storage) is developing the technology for the moving platform sensor such as Robot Vacuum Cleaners, Home Robot, Robotics Lawn Mower Sensor, etc.
@@ -10,6 +10,7 @@
   <author email="pyo@robotis.com">Pyo</author>
   <author email="thlim@robotis.com">Darby Lim</author>
   <author email="kkjong@robotis.com">Gilbert</author>
+  <author email="willson@robotis.com">Will Son</author>
   <author>JH Yang</author>
   <author>SP Kong</author>
   <maintainer email="willson@robotis.com">Will Son</maintainer>
