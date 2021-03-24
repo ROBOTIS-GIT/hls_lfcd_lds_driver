@@ -45,8 +45,8 @@ def generate_launch_description():
 
         Node(
             package='hls_lfcd_lds_driver',
-            node_executable='hlds_laser_publisher',
-            node_name='hlds_laser_publisher',
+            executable='hlds_laser_publisher',
+            name='hlds_laser_publisher',
             parameters=[{'port': port, 'frame_id': frame_id}],
             output='screen'),
     ])
