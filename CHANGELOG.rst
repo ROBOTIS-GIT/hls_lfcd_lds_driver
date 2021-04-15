@@ -2,6 +2,12 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.2 (2021-04-15)
+------------------
+* fix laserscan bug
+* rename nav2 params
+* Contributors: Will Son
+
 2.0.1 (2020-07-13)
 ------------------
 * ROS 2 Eloquent Elusor supported
