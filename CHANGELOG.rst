@@ -2,6 +2,11 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2021-04-16)
+------------------
+* fix LDS data issue
+* Contributors: Will Son
+
 1.1.1 (2020-07-13)
 ------------------
 * ROS 1 Noetic Ninjemys support

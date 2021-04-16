@@ -103,7 +103,6 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
           {
             good_sets++;
             motor_speed += (raw_bytes[i+3] << 8) + raw_bytes[i+2]; //accumulate count for avg. time increment
-            rpms=(raw_bytes[i+3]<<8|raw_bytes[i+2])/10;
 
             for(uint16_t j = i+4; j < i+40; j=j+6)
             {
@@ -127,8 +126,9 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
             }
           }
         }
-
-        scan->time_increment = motor_speed/good_sets/1e8;
+        rpms=motor_speed / good_sets / 10;
+        scan->time_increment = (float)(1.0 / (rpms*6));
+        scan->scan_time = scan->time_increment * 360;
       }
       else
       {
