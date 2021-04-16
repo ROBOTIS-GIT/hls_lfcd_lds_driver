@@ -2,9 +2,9 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.1.2 (2020-09-08)
+1.1.2 (2021-04-16)
 ------------------
-* fixed time_increment, scan_time in LaserScan msg
+* fix LDS data issue
 * Contributors: Will Son
 
 1.1.1 (2020-07-13)
