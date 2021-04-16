@@ -1,15 +1,15 @@
-name: ros-ci
+name: noetic-devel
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 on:
   push:
-    branches: [ master ]
+    branches: [ noetic-devel ]
   pull_request:
-    branches: [ master ]
+    branches: [ noetic-devel ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  master-ci:
+  noetic-devel-ci:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
