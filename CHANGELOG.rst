@@ -2,6 +2,14 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.2 (2021-04-15)
+------------------
+* fix laserscan data bug
+* rename nav2 params
+* fox bug, deprecated param name
+* use static param type for Galactic
+* Contributors: Will Son
+
 2.0.1 (2020-07-13)
 ------------------
 * ROS 2 Eloquent Elusor supported
