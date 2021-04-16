@@ -12,11 +12,11 @@ SRCS			= lds_driver.cpp
 OBJS			= lds_driver.o
 LIB_DIRS	= -L/usr/lib/x86_64-linux-gnu
 INC_DIRS  = -I/usr/include
-LIBS      = -lboost_system
+LIBS      = -lboost_system -pthread
 TARGET 	  = lds_driver
 
 all : $(TARGET)
-	$(CXX) -o $(TARGET) $(OBJS) $(INC_DIRS) $(LIB_DIRS) $(LIBS) 
+	$(CXX) -o $(TARGET) $(OBJS) $(INC_DIRS) $(LIB_DIRS) $(LIBS)
  
 $(TARGET) :
 	$(CXX) -c $(SRCS) $(INC_DIRS) $(LIB_DIRS) $(LIBS) 
