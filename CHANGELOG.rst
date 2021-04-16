@@ -2,6 +2,11 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.1.2 (2020-09-08)
+------------------
+* fixed time_increment, scan_time in LaserScan msg
+* Contributors: Will Son
+
 1.1.1 (2020-07-13)
 ------------------
 * ROS 1 Noetic Ninjemys support
