@@ -2,6 +2,11 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.3 (2021-06-07)
+------------------
+* Final Dashing release
+* Contributors: Will Son
+
 2.0.2 (2021-04-15)
 ------------------
 * fix laserscan data bug
