@@ -29,9 +29,9 @@ jobs:
           #   ros_distribution: foxy
           #   ros_version: 2
             # Galactic Geochelone (May 2021)
-          # - docker_image: ubuntu:focal
-          #   ros_distribution: galactic
-          #   ros_version: 2
+          - docker_image: ubuntu:focal
+            ros_distribution: galactic
+            ros_version: 2
             # Rolling
           - docker_image: ubuntu:focal
             ros_distribution: rolling
