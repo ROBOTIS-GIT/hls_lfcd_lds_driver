@@ -2,6 +2,11 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.4 (2021-07-15)
+------------------
+* fix linker error
+* Contributors: goekce, Will Son
+
 2.0.2 (2021-04-15)
 ------------------
 * fix laserscan data bug
