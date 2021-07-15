@@ -1,15 +1,15 @@
-name: ros2-devel
+name: ros2-ci
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 on:
   push:
-    branches: [ ros2-devel ]
+    branches: [ ros2, ros2-devel ]
   pull_request:
-    branches: [ ros2-devel ]
+    branches: [ ros2, ros2-devel ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  ros2-devel-ci:
+  ros2-ci:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -17,7 +17,7 @@ jobs:
         ros_distribution:
           # - dashing
           # - foxy
-          # - galactic
+          - galactic
           - rolling
         include:
             # Dashing Diademata (May 2019 - May 2021)
