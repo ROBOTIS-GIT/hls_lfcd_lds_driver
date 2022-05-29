@@ -84,6 +84,7 @@ void LFCDLaser::poll(sensor_msgs::LaserScan::Ptr scan)
         start_count = 0;
 
         // Now that entire start sequence has been found, read in the rest of the message
+        scan->header.stamp = ros::Time::now();
         got_scan = true;
 
         boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[2], 2518));
@@ -168,7 +169,6 @@ int main(int argc, char **argv)
       sensor_msgs::LaserScan::Ptr scan(new sensor_msgs::LaserScan);
       scan->header.frame_id = frame_id;
       laser.poll(scan);
-      scan->header.stamp = ros::Time::now();
       rpms.data=laser.rpms;
       laser_pub.publish(scan);
       motor_pub.publish(rpms);
