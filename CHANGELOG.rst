@@ -2,6 +2,10 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.0.5 (2022-07-15)
+------------------
+* ROS2 Humble Hawksbill supported
+
 2.0.4 (2021-07-15)
 ------------------
 * fix linker error
