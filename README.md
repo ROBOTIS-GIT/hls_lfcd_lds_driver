@@ -1,5 +1,5 @@
 # HLDS HLS-LFCD-LDS (LDS-01)
-<img src="http://emanual.robotis.com/assets/images/platform/turtlebot3/appendix_lds/lds.png" width="400">
+<img src="http://emanual.robotis.com/assets/images/platform/turtlebot3/appendix_lds/lds_small.png" width="400">
 
 - Active Branches: noetic, humble, main
 - Legacy Branches: *-devel
