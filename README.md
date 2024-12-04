@@ -1,14 +1,8 @@
 # HLDS HLS-LFCD-LDS (LDS-01)
-<img src="http://emanual.robotis.com/assets/images/platform/turtlebot3/appendix_lds/lds.png" width="400">
+<img src="http://emanual.robotis.com/assets/images/platform/turtlebot3/appendix_lds/lds_small.png" width="400">
 
-[![kinetic-devel Status](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/workflows/kinetic-devel/badge.svg)](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/tree/kinetic-devel)
-[![melodic-devel Status](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/workflows/melodic-devel/badge.svg)](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/tree/melodic-devel)
-[![noetic-devel Status](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/workflows/noetic-devel/badge.svg)](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/tree/noetic-devel)
-
-[![dashing-devel Status](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/workflows/dashing-devel/badge.svg)](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/tree/dashing-devel)
-[![foxy-devel Status](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/workflows/foxy-devel/badge.svg)](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/tree/foxy-devel)
-[![galactic-devel Status](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/workflows/galactic-devel/badge.svg)](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/tree/galactic-devel)
-[![humble-devel Status](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/workflows/humble-devel/badge.svg)](https://github.com/ROBOTIS-GIT/hls_lfcd_lds_driver/tree/humble-devel)
+- Active Branches: noetic, humble, main
+- Legacy Branches: *-devel
 
 ## ROBOTIS e-Manual for TurtleBot3 and LDS-01
 - [ROBOTIS e-Manual for TurtleBot3 and LDS-01](http://turtlebot3.robotis.com/)
