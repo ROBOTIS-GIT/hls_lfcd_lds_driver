@@ -36,7 +36,7 @@ include_directories(
 
 add_executable(hlds_laser_publisher	src/hlds_laser_publisher.cpp)
 target_link_libraries(hlds_laser_publisher ${Boost_LIBRARIES})
-ament_target_dependencies(hlds_laser_publisher
+target_link_libraries(hlds_laser_publisher PUBLIC
   rclcpp
   std_msgs
   sensor_msgs
