@@ -27,8 +27,9 @@
 **
 ****************************************************************************/
 
-#ifndef LDSPOLARGRAPH_H
-#define LDSPOLARGRAPH_H
+#ifndef APPLICATIONS__LDS_POLAR_GRAPH__LDS_POLAR_GRAPH_HPP_
+#define APPLICATIONS__LDS_POLAR_GRAPH__LDS_POLAR_GRAPH_HPP_
+
 
 #include <QTimer>
 #include <QtGui/QMouseEvent>
@@ -38,39 +39,42 @@
 #include <QtCharts/QAbstractAxis>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QScatterSeries>
-#include <QtCharts/QValueAxis>
+
+#include <string>
+
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <string>
+
 
 QT_CHARTS_USE_NAMESPACE
 
 class LdsPolarGraph : public QChartView
 {
   Q_OBJECT
+
 public:
-  LdsPolarGraph(QWidget *parent = 0);
+  explicit LdsPolarGraph(QWidget * parent = 0);
   ~LdsPolarGraph();
-  uint16_t* poll();
-  void close() { shutting_down_ = true; }
+  uint16_t * poll();
+  void close() {shutting_down_ = true;}
 
 private Q_SLOTS:
   void loadData();
 
 private:
   QTimer timer_;
-  QPolarChart *chart_;
-  QScatterSeries *series_;
+  QPolarChart * chart_;
+  QScatterSeries * series_;
   qreal angular_min_;
   qreal angular_max_;
   qreal radial_min_;
   qreal radial_max;
   boost::asio::io_service io_;
-  std::string port_; ///< @brief The serial port the driver is attached to
-  uint32_t baud_rate_; ///< @brief The baud rate for the serial connection
-  bool shutting_down_; ///< @brief Flag for whether the driver is supposed to be shutting down or not
-  boost::asio::serial_port serial_; ///< @brief Actual serial port object for reading/writing to the LFCD Laser Scanner
-  uint16_t motor_speed_; ///< @brief current motor speed as reported by the LFCD.
+  std::string port_;
+  uint32_t baud_rate_;
+  bool shutting_down_;
+  boost::asio::serial_port serial_;
+  uint16_t motor_speed_;
 };
 
-#endif
+#endif  // APPLICATIONS__LDS_POLAR_GRAPH__LDS_POLAR_GRAPH_HPP_

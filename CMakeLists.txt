@@ -34,7 +34,7 @@ include_directories(
   ${Boost_INCLUDE_DIRS}
 )
 
-add_executable(hlds_laser_publisher	src/hlds_laser_publisher.cpp)
+add_executable(hlds_laser_publisher src/hlds_laser_publisher.cpp)
 target_link_libraries(hlds_laser_publisher
   ${Boost_LIBRARIES}
   ${sensor_msgs_TARGETS}
