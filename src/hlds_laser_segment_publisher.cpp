@@ -32,12 +32,12 @@
 /* Authors: SP Kong, JH Yang, Pyo */
 /* maintainer: Pyo */
 
-#include <hls_lfcd_lds_driver/hlds_laser_segment_publisher.h>
+#include <hls_lfcd_lds_driver/hlds_laser_segment_publisher.hpp>
+
 #include <sensor_msgs/LaserScan.h>
 #include <ros/ros.h>
 
 #include <boost/asio.hpp>
-
 
 namespace hls_lfcd_lds
 {
