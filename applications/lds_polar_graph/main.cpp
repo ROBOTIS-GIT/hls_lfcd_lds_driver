@@ -27,15 +27,14 @@
 **
 ****************************************************************************/
 
-#include "lds_polar_graph.h"
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 
-int main(int argc, char *argv[])
+int main(int argc, char * argv[])
 {
   QApplication a(argc, argv);
   QMainWindow window;
-  LdsPolarGraph *lds_polar_graph = new LdsPolarGraph();
+  LdsPolarGraph * lds_polar_graph = new LdsPolarGraph();
 
   window.setCentralWidget(lds_polar_graph);
   window.resize(800, 600);

@@ -29,36 +29,39 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
 
- /* Authors: SP Kong, JH Yang, Pyo */
- /* maintainer: Pyo */
+/* Authors: SP Kong, JH Yang, Pyo */
+/* maintainer: Pyo */
 
-#ifndef HLDS_LASER_SEGMENT_PUBLISHER_H_
-#define HLDS_LASER_SEGMENT_PUBLISHER_H_
+#ifndef HLS_LFCD_LDS_DRIVER__HLDS_LASER_SEGMENT_PUBLISHER_HPP_
+#define HLS_LFCD_LDS_DRIVER__HLDS_LASER_SEGMENT_PUBLISHER_HPP_
 
-#include <string>
 #include <std_msgs/UInt16.h>
 #include <sensor_msgs/LaserScan.h>
+
+#include <string>
+
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
+
 
 namespace hls_lfcd_lds
 {
 class LFCDLaser
 {
- public:
-  //uint16_t rpms; ///< @brief RPMS derived from the rpm bytes in an LFCD packet
+public:
+  //  uint16_t rpms;  ///< @brief RPMS derived from the rpm bytes in an LFCD packet
   /**
   * @brief Constructs a new LFCDLaser attached to the given serial port
   * @param port The string for the serial port device to attempt to connect to, e.g. "/dev/ttyUSB0"
   * @param baud_rate The baud rate to open the serial port at.
   * @param io Boost ASIO IO Service to use when creating the serial port object
   */
-	LFCDLaser(boost::asio::io_service& io);
+  explicit LFCDLaser(boost::asio::io_service & io);
 
   /**
   * @brief Default destructor
   */
-  ~LFCDLaser() {};
+  ~LFCDLaser() {}
 
   /**
   * @brief Poll the laser to get a new scan. Blocks until a complete new scan is received or close is called.
@@ -71,7 +74,7 @@ class LFCDLaser
   */
   void close();
 
- private:
+private:
   // ROS NodeHandle
   ros::NodeHandle nh_;
 
@@ -81,15 +84,15 @@ class LFCDLaser
   std::string frame_id_;
   sensor_msgs::LaserScan scan_;
 
-  std::string port_; ///< @brief The serial port the driver is attached to
-  int baud_rate_; ///< @brief The baud rate for the serial connection
+  std::string port_;
+  int baud_rate_;
   int lfcdstart_;
   int lfcdstop_;
-  int lfcdstartstop_; ///< @brief The LDS Start/Stop to check.
-  bool shutting_down_; ///< @brief Flag for whether the driver is supposed to be shutting down or not
-  boost::asio::serial_port serial_; ///< @brief Actual serial port object for reading/writing to the LFCD Laser Scanner
-  uint16_t motor_speed_; ///< @brief current motor speed as reported by the LFCD.
+  int lfcdstartstop_;
+  bool shutting_down_;
+  boost::asio::serial_port serial_;
+  uint16_t motor_speed_;
 };
-};
+}   // namespace hls_lfcd_lds
 
-#endif // HLDS_LASER_SEGMENT_PUBLISHER_H_
+#endif  // HLS_LFCD_LDS_DRIVER__HLDS_LASER_SEGMENT_PUBLISHER_HPP_

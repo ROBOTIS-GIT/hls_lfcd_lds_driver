@@ -32,14 +32,16 @@
 /* Authors: SP Kong, JH Yang, Pyo */
 /* maintainer: Pyo */
 
-#include <ros/ros.h>
+#include <hls_lfcd_lds_driver/hlds_laser_segment_publisher.hpp>
+
 #include <sensor_msgs/LaserScan.h>
+#include <ros/ros.h>
+
 #include <boost/asio.hpp>
-#include <hls_lfcd_lds_driver/hlds_laser_segment_publisher.h>
 
 namespace hls_lfcd_lds
 {
-LFCDLaser::LFCDLaser(boost::asio::io_service& io)
+LFCDLaser::LFCDLaser(boost::asio::io_service & io)
 : serial_(io),
   shutting_down_(false)
 {
@@ -53,20 +55,17 @@ LFCDLaser::LFCDLaser(boost::asio::io_service& io)
   serial_.open(port_);
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
 
-  if(lfcdstartstop_ == 1)
-  {
+  if (lfcdstartstop_ == 1) {
     // Below command is not required after firmware upgrade (2017.10)
     boost::asio::write(serial_, boost::asio::buffer("b", 1));
-  }
-  else if(lfcdstartstop_ == 2)
-  {
+  } else if (lfcdstartstop_ == 2) {
     boost::asio::write(serial_, boost::asio::buffer("e", 1));
   }
 
   scan_.header.frame_id = frame_id_;
-  scan_.angle_increment = (2.0*M_PI/360.0);
+  scan_.angle_increment = (2.0 * M_PI / 360.0);
   scan_.angle_min = 0.0;
-  scan_.angle_max = 2.0*M_PI-scan_.angle_increment;
+  scan_.angle_max = 2.0 * M_PI - scan_.angle_increment;
   scan_.range_min = 0.12;
   scan_.range_max = 3.5;
   scan_.ranges.resize(360);
@@ -83,30 +82,26 @@ void LFCDLaser::poll()
   int index;
 
 
-  while (!shutting_down_ && !got_scan)
-  {
-    boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[0],1));
+  while (!shutting_down_ && !got_scan) {
+    boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[0], 1));
 
-    if(raw_bytes[0] == 0xFA)
-    {
+    if (raw_bytes[0] == 0xFA) {
       got_scan = true;
-      boost::asio::read(serial_,boost::asio::buffer(&raw_bytes[1], 41));
+      boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[1], 41));
 
-      if(raw_bytes[1] >= 0xA0  && raw_bytes[1] <= 0xDB) // TODO: checksum
-      {
+      if (raw_bytes[1] >= 0xA0 && raw_bytes[1] <= 0xDB) {
         int degree_count_num = 0;
 
         index = (raw_bytes[1] - 0xA0) * 6;
 
-        for(uint16_t j = 4; j < 40; j = j + 6)
-        {
+        for (uint16_t j = 4; j < 40; j = j + 6) {
           uint8_t byte0 = raw_bytes[j];
-          uint8_t byte1 = raw_bytes[j+1];
-          uint8_t byte2 = raw_bytes[j+2];
-          uint8_t byte3 = raw_bytes[j+3];
+          uint8_t byte1 = raw_bytes[j + 1];
+          uint8_t byte2 = raw_bytes[j + 2];
+          uint8_t byte3 = raw_bytes[j + 3];
 
           uint16_t intensity = (byte1 << 8) + byte0;
-          uint16_t range     = (byte3 << 8) + byte2;
+          uint16_t range = (byte3 << 8) + byte2;
 
           scan_.ranges[359 - index - degree_count_num] = range / 1000.0;
           scan_.intensities[359 - index - degree_count_num] = intensity;
@@ -114,7 +109,7 @@ void LFCDLaser::poll()
           degree_count_num++;
         }
 
-        scan_.time_increment = 0.2 / 360; // 1sec / 5scan/ 360beam
+        scan_.time_increment = 0.2 / 360;  // 1sec / 5scan/ 360beam
         scan_.scan_time = 0.2 / 60;
         scan_.header.stamp = ros::Time::now();
         laser_pub_.publish(scan_);
@@ -130,18 +125,17 @@ void LFCDLaser::close()
   serial_.open(port_);
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
   boost::asio::write(serial_, boost::asio::buffer("e", 1));
-};
-};
+}
+}  // namespace hls_lfcd_lds
 
-int main(int argc, char* argv[])
+int main(int argc, char * argv[])
 {
   ros::init(argc, argv, "hlds_laser_segment_publisher");
 
   boost::asio::io_service io;
   hls_lfcd_lds::LFCDLaser laser(io);
 
-  while (ros::ok())
-  {
+  while (ros::ok()) {
     laser.poll();
   }
   laser.close();
