@@ -54,7 +54,7 @@ public:
   * @param baud_rate The baud rate to open the serial port at.
   * @param io Boost ASIO IO Service to use when creating the serial port object
   */
-  LFCDLaser(const std::string & port, uint32_t baud_rate, boost::asio::io_service & io);
+  LFCDLaser(const std::string & port, uint32_t baud_rate, boost::asio::io_context & io);
 
   /**
   * @brief Default destructor

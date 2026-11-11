@@ -20,7 +20,7 @@
   <buildtool_depend>ament_cmake</buildtool_depend>
   <depend>rclcpp</depend>
   <depend>sensor_msgs</depend>
-  <depend>libboost-system-dev</depend>
+  <depend>boost</depend>
   <export>
     <build_type>ament_cmake</build_type>
   </export>
