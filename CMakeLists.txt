@@ -24,7 +24,8 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(Boost REQUIRED system)
+find_package(Boost REQUIRED)
+find_package(Threads REQUIRED)
 
 ################################################################################
 # Build
@@ -36,7 +37,8 @@ include_directories(
 
 add_executable(hlds_laser_publisher src/hlds_laser_publisher.cpp)
 target_link_libraries(hlds_laser_publisher
-  ${Boost_LIBRARIES}
+  Boost::headers
+  Threads::Threads
   ${sensor_msgs_TARGETS}
   ${std_msgs_TARGETS}
   rclcpp::rclcpp
