@@ -37,9 +37,14 @@
 #include <boost/asio.hpp>
 #include <hls_lfcd_lds_driver/lfcd_laser.hpp>
 
+namespace
+{
+constexpr double kPi = 3.14159265358979323846;
+}
+
 namespace hls_lfcd_lds
 {
-LFCDLaser::LFCDLaser(const std::string & port, uint32_t baud_rate, boost::asio::io_service & io)
+LFCDLaser::LFCDLaser(const std::string & port, uint32_t baud_rate, boost::asio::io_context & io)
 : port_(port), baud_rate_(baud_rate), shutting_down_(false), serial_(io, port_)
 {
   serial_.set_option(boost::asio::serial_port_base::baud_rate(baud_rate_));
@@ -79,9 +84,9 @@ void LFCDLaser::poll(sensor_msgs::msg::LaserScan::SharedPtr scan)
 
         boost::asio::read(serial_, boost::asio::buffer(&raw_bytes[2], 2518));
 
-        scan->angle_increment = (2.0 * M_PI / 360.0);
+        scan->angle_increment = (2.0 * kPi / 360.0);
         scan->angle_min = 0.0;
-        scan->angle_max = 2.0 * M_PI - scan->angle_increment;
+        scan->angle_max = 2.0 * kPi - scan->angle_increment;
         scan->range_min = 0.12;
         scan->range_max = 3.5;
         scan->ranges.resize(360);
@@ -127,7 +132,7 @@ int main(int argc, char ** argv)
 
   auto node = rclcpp::Node::make_shared("hlds_laser_publisher");
   rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr laser_pub;
-  boost::asio::io_service io;
+  boost::asio::io_context io;
 
   std::string port;
   std::string frame_id;
