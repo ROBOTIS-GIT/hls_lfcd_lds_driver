@@ -2,6 +2,15 @@
 Changelog for package hls_lfcd_lds_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+2.1.2 (2026-11-12)
+------------------
+* Update Boost compatibility by using boost::asio::io_context and linking Boost headers and Threads
+* Replace M_PI with a portable constexpr constant
+* Add rosdep dependency installation and checks to CI
+* Expand ROS 2 CI coverage to Kilted and Lyrical and update Rolling to Ubuntu Resolute
+* Add an automated release workflow for pull requests from main to jazzy
+* Contributors: Hyungyu Kim, Taehun Lim
+
 2.1.1 (2025-05-28)
 ------------------
 * Deprecate ament_include_dependency usage in CMakeLists.txt
